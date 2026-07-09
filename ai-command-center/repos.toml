@@ -1,0 +1,33 @@
+# GitHub-Repo-Übersicht für das AI Command Center.
+# Jedes [[repo]] = eine Kachel. Daten (Beschreibung, letzter Push, Sprache)
+# holt das Dashboard live über die gh CLI. Neue Repos einfach anhängen.
+#   name   Repo-Name auf GitHub (ohne Owner)
+#   label  Anzeigename im Dashboard
+#   icon   Emoji als Kachelsymbol
+
+owner = "sternlb"
+
+[[repo]]
+name = "2526_KI1_DatB"
+label = "Unterricht · Datenbanken"
+icon = "🗄️"
+
+[[repo]]
+name = "2526_KI1_GdP_C"
+label = "Unterricht · GdP (C)"
+icon = "⚙️"
+
+[[repo]]
+name = "SecondBrain-Leo"
+label = "Second Brain (Vault)"
+icon = "🧠"
+
+[[repo]]
+name = "nem-app"
+label = "NEM-App"
+icon = "💊"
+
+[[repo]]
+name = "scan-workflow"
+label = "Scan-Workflow"
+icon = "📄"

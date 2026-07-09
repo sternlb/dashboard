@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Termin buchen — Basel-AI Consulting</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=Space+Mono&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --forest:#14532D; --deep:#0C1F15; --lime:#A3E635; --yellow:#FDE047;
+    --paper:#FAFAF5; --ink:#0A0F0C; --dim:#6B7280; --line:#E5E5DC; --r:2px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--paper);color:var(--ink);font-family:Inter,sans-serif;line-height:1.6}
+  .wrap{max-width:880px;margin:0 auto;padding:0 1.25rem 5rem}
+
+  header{background:var(--deep);color:var(--paper);padding:2.5rem 0 2.2rem}
+  header .wrap{padding-bottom:0}
+  .brand{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.4rem;display:flex;align-items:center;gap:.4rem}
+  .brand .pill{background:var(--lime);color:var(--forest);padding:.05rem .5rem;border-radius:var(--r);font-size:1.05rem}
+  .tagline{font-family:'Space Mono',monospace;font-size:.78rem;color:rgba(250,250,245,.55);margin-top:.4rem;letter-spacing:.08em}
+  h1{font-family:'Space Grotesk',sans-serif;font-size:2rem;margin-top:1.8rem;line-height:1.2}
+  h1 .u{box-shadow:inset 0 -0.35em 0 var(--lime);color:var(--paper)}
+  header p.sub{color:rgba(250,250,245,.7);margin-top:.6rem;max-width:34rem}
+
+  .steps{display:flex;gap:.5rem;margin:2.2rem 0 1.6rem;font-family:'Space Mono',monospace;font-size:.72rem;color:var(--dim);flex-wrap:wrap}
+  .steps span{padding:.25rem .6rem;border:1px solid var(--line);border-radius:var(--r);background:#fff}
+  .steps span.on{background:var(--forest);color:var(--paper);border-color:var(--forest)}
+
+  h2{font-family:'Space Grotesk',sans-serif;font-size:1.15rem;margin:1.8rem 0 .9rem}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:.8rem}
+  .card{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:1.1rem 1.15rem;cursor:pointer;text-align:left;transition:border-color .15s, transform .15s}
+  .card:hover{border-color:var(--forest);transform:translateY(-2px)}
+  .card.sel{border:2px solid var(--forest)}
+  .card h3{font-family:'Space Grotesk',sans-serif;font-size:1rem;color:var(--forest)}
+  .card .price{font-family:'Space Mono',monospace;font-size:.7rem;color:var(--dim);margin:.35rem 0 .5rem}
+  .card p{font-size:.85rem;color:var(--ink)}
+  .card .dur{display:inline-block;margin-top:.6rem;background:var(--lime);color:var(--forest);font-family:'Space Mono',monospace;font-size:.7rem;padding:.1rem .5rem;border-radius:var(--r)}
+
+  .cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:.7rem}
+  .cal-head b{font-family:'Space Grotesk',sans-serif;font-size:1rem}
+  .cal-head button{background:#fff;border:1px solid var(--line);border-radius:var(--r);width:2.2rem;height:2.2rem;font-size:1rem;cursor:pointer}
+  .cal-head button:hover:not(:disabled){border-color:var(--forest)}
+  .cal-head button:disabled{opacity:.35;cursor:default}
+  .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:.3rem}
+  .dow{font-family:'Space Mono',monospace;font-size:.65rem;color:var(--dim);text-align:center;padding:.3rem 0}
+  .day{aspect-ratio:1;border:1px solid transparent;border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:.9rem;color:#C8C8BE;background:transparent}
+  .day.free{background:#fff;border-color:var(--line);color:var(--ink);cursor:pointer;font-weight:600}
+  .day.free:hover{border-color:var(--forest)}
+  .day.sel{background:var(--forest);color:var(--paper);border-color:var(--forest)}
+  .legend{font-size:.75rem;color:var(--dim);margin-top:.6rem}
+
+  .slots{display:flex;flex-wrap:wrap;gap:.5rem}
+  .slot{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:.5rem .9rem;font-family:'Space Mono',monospace;font-size:.85rem;cursor:pointer}
+  .slot:hover{border-color:var(--forest)}
+  .slot.sel{background:var(--forest);color:var(--paper);border-color:var(--forest)}
+
+  form{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:1.4rem;max-width:34rem}
+  label{display:block;font-size:.8rem;font-weight:600;margin:.9rem 0 .25rem}
+  label:first-child{margin-top:0}
+  input,textarea{width:100%;padding:.55rem .7rem;border:1px solid var(--line);border-radius:var(--r);font-family:Inter,sans-serif;font-size:.9rem;background:var(--paper)}
+  input:focus,textarea:focus{outline:2px solid var(--lime);border-color:var(--forest)}
+  .hp{position:absolute;left:-6000px;top:auto}
+  .summary{font-family:'Space Mono',monospace;font-size:.78rem;background:var(--deep);color:var(--lime);padding:.6rem .8rem;border-radius:var(--r);margin-bottom:1rem}
+  .btn{display:inline-block;background:var(--forest);color:var(--paper);border:none;border-radius:var(--r);padding:.75rem 1.6rem;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.95rem;cursor:pointer;margin-top:1.2rem}
+  .btn:hover{background:var(--deep)}
+  .btn:disabled{opacity:.5;cursor:default}
+  .privacy{font-size:.72rem;color:var(--dim);margin-top:.8rem;max-width:32rem}
+
+  .msg{padding:.8rem 1rem;border-radius:var(--r);font-size:.88rem;margin:1rem 0;display:none}
+  .msg.err{display:block;background:#FEE2E2;color:#991B1B}
+  .ok-box{background:var(--deep);color:var(--paper);border-radius:var(--r);padding:2rem;text-align:center;display:none}
+  .ok-box .spark{color:var(--yellow);font-size:1.6rem}
+  .ok-box h2{color:var(--lime);margin:.4rem 0 .8rem}
+  .ok-box a{color:var(--lime)}
+  .hidden{display:none}
+  .loading{font-family:'Space Mono',monospace;font-size:.8rem;color:var(--dim)}
+  @media (prefers-reduced-motion: reduce){*{transition:none !important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="brand">basel <span class="pill">AI</span></div>
+    <div class="tagline">CONSULTING · KI-METHODEN &amp; TOOLS FÜR DIE LEHRE</div>
+    <h1>Termin <span class="u">buchen</span></h1>
+    <p class="sub">Wählen Sie ein Format und einen freien Zeitpunkt — die Bestätigung mit Kalendereinladung kommt direkt per E-Mail.</p>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="steps">
+    <span id="st1" class="on">1 · FORMAT</span>
+    <span id="st2">2 · TAG</span>
+    <span id="st3">3 · UHRZEIT</span>
+    <span id="st4">4 · DATEN</span>
+  </div>
+
+  <section id="sec-types">
+    <h2>Welches Format passt?</h2>
+    <div class="cards" id="type-cards"><span class="loading">Lade Formate …</span></div>
+  </section>
+
+  <section id="sec-cal" class="hidden">
+    <h2>Freien Tag wählen</h2>
+    <div class="cal-head">
+      <button id="prev" aria-label="Voriger Monat">‹</button>
+      <b id="cal-title"></b>
+      <button id="next" aria-label="Nächster Monat">›</button>
+    </div>
+    <div class="grid" id="cal-grid"></div>
+    <div class="legend">Nur Tage mit freien Zeiten sind wählbar · max. ein Termin pro Tag · Zeitzone Europe/Berlin</div>
+  </section>
+
+  <section id="sec-slots" class="hidden">
+    <h2 id="slots-title">Uhrzeit wählen</h2>
+    <div class="slots" id="slot-list"></div>
+  </section>
+
+  <section id="sec-form" class="hidden">
+    <h2>Ihre Daten</h2>
+    <form id="form" autocomplete="on">
+      <div class="summary" id="summary"></div>
+      <label for="f-name">Name *</label>
+      <input id="f-name" required maxlength="120">
+      <label for="f-email">E-Mail *</label>
+      <input id="f-email" type="email" required maxlength="200">
+      <label for="f-org">Schule / Einrichtung / Unternehmen</label>
+      <input id="f-org" maxlength="200">
+      <label for="f-note">Ihr Anliegen</label>
+      <textarea id="f-note" rows="4" maxlength="2000" placeholder="Worum geht es? Je konkreter, desto besser kann ich mich vorbereiten."></textarea>
+      <div class="hp"><label for="f-web">Website</label><input id="f-web" tabindex="-1" autocomplete="off"></div>
+      <button class="btn" id="submit" type="submit">Verbindlich buchen</button>
+      <p class="privacy">Ihre Angaben werden ausschließlich zur Terminabwicklung verwendet und als Kalendereintrag gespeichert. Leonhard Basel Latour · Basel-AI Consulting · Röthenbach a. d. Pegnitz.</p>
+    </form>
+  </section>
+
+  <div class="msg err" id="err"></div>
+
+  <div class="ok-box" id="ok">
+    <div class="spark">✦</div>
+    <h2>Termin gebucht!</h2>
+    <p id="ok-text"></p>
+    <p id="ok-meet"></p>
+    <p style="margin-top:.8rem;font-size:.85rem;opacity:.7">Sie erhalten in Kürze eine Kalendereinladung per E-Mail.</p>
+  </div>
+</div>
+
+<script>
+const MONTHS=["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
+const DOWS=["Mo","Di","Mi","Do","Fr","Sa","So"];
+let types={}, sel={type:null,day:null,time:null}, view=new Date(), avail={};
+
+const $=id=>document.getElementById(id);
+const err=t=>{const e=$("err");e.textContent=t||"";e.className=t?"msg err":"msg";};
+const step=n=>[1,2,3,4].forEach(i=>$("st"+i).classList.toggle("on",i<=n));
+
+async function api(path){
+  const r=await fetch(path);
+  if(!r.ok) throw new Error((await r.json().catch(()=>({}))).detail||"Serverfehler");
+  return r.json();
+}
+
+async function loadTypes(){
+  try{
+    types=await api("/api/types");
+    $("type-cards").innerHTML="";
+    for(const [key,t] of Object.entries(types)){
+      const c=document.createElement("button");
+      c.className="card"; c.type="button";
+      c.innerHTML=`<h3>${t.label}</h3><div class="price">${t.price}</div><p>${t.description}</p><span class="dur">${t.duration_min} MIN</span>`;
+      c.onclick=()=>{ sel={type:key,day:null,time:null};
+        document.querySelectorAll(".card").forEach(x=>x.classList.remove("sel")); c.classList.add("sel");
+        $("sec-cal").classList.remove("hidden"); $("sec-slots").classList.add("hidden"); $("sec-form").classList.add("hidden");
+        err(""); step(2); loadMonth(); $("sec-cal").scrollIntoView({behavior:"smooth",block:"start"}); };
+      $("type-cards").appendChild(c);
+    }
+  }catch(e){ $("type-cards").innerHTML=""; err("Formate konnten nicht geladen werden: "+e.message); }
+}
+
+async function loadMonth(){
+  const y=view.getFullYear(), m=view.getMonth()+1;
+  $("cal-title").textContent=MONTHS[m-1]+" "+y;
+  $("cal-grid").innerHTML=DOWS.map(d=>`<div class="dow">${d}</div>`).join("");
+  const now=new Date();
+  $("prev").disabled=(y===now.getFullYear()&&m===now.getMonth()+1);
+  try{
+    avail=(await api(`/api/availability?type=${sel.type}&year=${y}&month=${m}`)).days;
+  }catch(e){ err("Verfügbarkeit konnte nicht geladen werden: "+e.message); avail={}; }
+  const first=new Date(y,m-1,1), pad=(first.getDay()+6)%7, days=new Date(y,m,0).getDate();
+  for(let i=0;i<pad;i++) $("cal-grid").appendChild(document.createElement("div"));
+  for(let d=1;d<=days;d++){
+    const iso=`${y}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+    const el=document.createElement("div");
+    el.textContent=d; el.className="day"+(avail[iso]?" free":"");
+    if(avail[iso]) el.onclick=()=>pickDay(iso,el);
+    $("cal-grid").appendChild(el);
+  }
+}
+
+function pickDay(iso,el){
+  document.querySelectorAll(".day").forEach(x=>x.classList.remove("sel")); el.classList.add("sel");
+  sel.day=iso; sel.time=null; err(""); step(3);
+  const [y,m,d]=iso.split("-");
+  $("slots-title").textContent=`Uhrzeit am ${d}.${m}.${y}`;
+  $("slot-list").innerHTML="";
+  for(const t of avail[iso]){
+    const b=document.createElement("button");
+    b.className="slot"; b.type="button"; b.textContent=t+" Uhr";
+    b.onclick=()=>{ document.querySelectorAll(".slot").forEach(x=>x.classList.remove("sel")); b.classList.add("sel");
+      sel.time=t; step(4);
+      $("summary").textContent=`${types[sel.type].label} · ${d}.${m}.${y} · ${t} Uhr · ${types[sel.type].duration_min} min`;
+      $("sec-form").classList.remove("hidden"); $("sec-form").scrollIntoView({behavior:"smooth",block:"start"}); };
+    $("slot-list").appendChild(b);
+  }
+  $("sec-slots").classList.remove("hidden"); $("sec-form").classList.add("hidden");
+  $("sec-slots").scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+$("prev").onclick=()=>{view.setMonth(view.getMonth()-1);loadMonth();};
+$("next").onclick=()=>{view.setMonth(view.getMonth()+1);loadMonth();};
+
+$("form").onsubmit=async ev=>{
+  ev.preventDefault(); err(""); $("submit").disabled=true; $("submit").textContent="Buche …";
+  try{
+    const r=await fetch("/api/book",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({type:sel.type,start:`${sel.day}T${sel.time}`,
+        name:$("f-name").value,email:$("f-email").value,organization:$("f-org").value,
+        note:$("f-note").value,website:$("f-web").value})});
+    const data=await r.json();
+    if(!r.ok) throw new Error(data.detail||"Buchung fehlgeschlagen.");
+    ["sec-types","sec-cal","sec-slots","sec-form"].forEach(s=>$(s).classList.add("hidden"));
+    const [y,m,d]=sel.day.split("-");
+    $("ok-text").textContent=`${data.label} am ${d}.${m}.${y} um ${sel.time} Uhr (${data.duration_min} min).`;
+    if(data.meet_link) $("ok-meet").innerHTML=`Google Meet: <a href="${data.meet_link}">${data.meet_link}</a>`;
+    $("ok").style.display="block"; window.scrollTo({top:0,behavior:"smooth"});
+  }catch(e){
+    err(e.message);
+    if(String(e.message).includes("nicht mehr verfügbar")){ loadMonth(); $("sec-slots").classList.add("hidden"); $("sec-form").classList.add("hidden"); step(2); }
+  }finally{ $("submit").disabled=false; $("submit").textContent="Verbindlich buchen"; }
+};
+
+loadTypes();
+</script>
+</body>
+</html>

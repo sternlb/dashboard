@@ -1,0 +1,5 @@
+name,isin,asset_class,theme,shares,buy_price,last_price,cost_eur,value_eur,ticker,buy_date
+iShares Core DAX ETF,DE0005933931,ETF,Welt/Breit,25,118.50,206.05,2962.50,5151.25,EXS1.DE,2023-04-14
+Apple,US0378331005,Aktie,KI/Tech,15,150.00,289.36,2250.00,4340.40,AAPL,2022-11-02
+SAP,DE0007164600,Aktie,KI/Tech,18,108.00,134.00,1944.00,2412.00,SAP.DE,2024-06-20
+Bitcoin,,Krypto,Krypto,0.15,38000.00,51317.74,5700.00,7697.66,BTC-EUR,2021-12-01

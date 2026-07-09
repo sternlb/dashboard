@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+.streamlit/secrets.toml
+# OAuth-Token / Credentials (Kalender)
+token.json
+credentials.json
+# Manueller Free-Credit-Stand
+token_state.json
+# Server-Logs (enthalten LAN-/externe IP)
+run.log
+run.err

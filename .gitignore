@@ -1,0 +1,22 @@
+# --- Python ---
+.venv/
+__pycache__/
+*.pyc
+
+# --- Logs (enthalten LAN-/externe IP) ---
+*.log
+run.err
+run.log
+
+# --- Secrets: NIEMALS committen ---
+.env
+.streamlit/secrets.toml
+credentials.json
+token.json
+token_state.json
+
+# --- Persoenliche Depot-Daten (Trading Agent) ---
+trading-agent/data/holdings.csv
+trading-agent/data/favorites.json
+trading-agent/data/watchlist_snapshot.csv
+trading-agent/data/last_update.txt

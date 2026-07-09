@@ -1,0 +1,49 @@
+# Tool-Launcher für das AI Command Center.
+# Jedes [[tool]] = eine Kachel. Neue Dashboards/Tools einfach unten anhängen.
+#   name   Anzeigename
+#   icon   Emoji als Kachelsymbol
+#   url    Link (lokale App-URL oder Web)
+#   desc   kurze Beschreibung
+#   status aktiv | in Arbeit | geplant
+
+[[tool]]
+name = "Trading Agent"
+icon = "📈"
+url = "http://localhost:8501"
+desc = "Finance-Dashboard · Depot, Signale, Backtest"
+status = "aktiv"
+
+[[tool]]
+name = "Landing Page Basel-AI"
+icon = "🌐"
+url = "http://localhost:8502"
+desc = "Firmen-Landingpage"
+status = "aktiv"
+
+[[tool]]
+name = "Kurs-Katalog Basel-AI"
+icon = "📚"
+url = "http://localhost:8502/kurse"
+desc = "Alle Vorträge, Workshops & Material im Überblick"
+status = "aktiv"
+
+[[tool]]
+name = "GdP – Unterricht"
+icon = "💻"
+url = "http://localhost:8502/gdp/"
+desc = "Grundlagen der Programmierung (C) · alle Stunden"
+status = "aktiv"
+
+[[tool]]
+name = "DatB – Unterricht"
+icon = "🗄️"
+url = "http://localhost:8502/datb/"
+desc = "Datenbanken · alle Stunden"
+status = "aktiv"
+
+[[tool]]
+name = "Neues Tool"
+icon = "➕"
+url = ""
+desc = "Platzhalter – hier kommen künftige Dashboards rein"
+status = "geplant"

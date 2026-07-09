@@ -1,0 +1,13 @@
+[theme]
+base = "dark"
+primaryColor = "#A3E635"
+backgroundColor = "#0C1F15"
+secondaryBackgroundColor = "#14532D"
+textColor = "#FAFAF5"
+linkColor = "#A3E635"
+font = "sans-serif"
+
+[server]
+headless = true
+# Im Heimnetz erreichbar machen (Handy/Laptop): auf allen Interfaces lauschen.
+address = "0.0.0.0"

@@ -1,0 +1,14 @@
+.venv/
+__pycache__/
+*.pyc
+.streamlit/secrets.toml
+.env
+*.log
+data_cache/
+# persönliche Depot-Daten nicht versionieren
+/data/holdings.csv
+
+# generierte Snapshots
+/data/watchlist_snapshot.csv
+/data/last_update.txt
+/data/favorites.json

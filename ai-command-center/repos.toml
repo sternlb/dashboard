@@ -8,6 +8,11 @@
 owner = "sternlb"
 
 [[repo]]
+name = "dashboard"
+label = "Dashboard (dieses Repo)"
+icon = "🎛️"
+
+[[repo]]
 name = "2526_KI1_DatB"
 label = "Unterricht · Datenbanken"
 icon = "🗄️"

@@ -4,6 +4,8 @@
 #   name   Repo-Name auf GitHub (ohne Owner)
 #   label  Anzeigename im Dashboard
 #   icon   Emoji als Kachelsymbol
+#   sync   true = lokaler Klon (…\repos\<name>) wird beim Dashboard-Start und
+#          über den "Repos aktualisieren"-Button per git pull aktualisiert
 
 owner = "sternlb"
 
@@ -16,16 +18,19 @@ icon = "🎛️"
 name = "2526_KI1_DatB"
 label = "Unterricht · Datenbanken"
 icon = "🗄️"
+sync = true
 
 [[repo]]
 name = "2526_KI1_GdP_C"
 label = "Unterricht · GdP (C)"
 icon = "⚙️"
+sync = true
 
 [[repo]]
 name = "SecondBrain-Leo"
 label = "Second Brain (Vault)"
 icon = "🧠"
+sync = true
 
 [[repo]]
 name = "nem-app"

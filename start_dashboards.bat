@@ -7,6 +7,10 @@ REM  und Ordner + Port anpassen.
 REM ============================================================
 set "ROOT=%~dp0"
 
+REM --- Repo-Sync: Unterrichts-Repos + Vault von GitHub ziehen ---
+REM Fehler blockieren den Start nicht (Skript liefert immer Exit 0).
+python "%ROOT%ai-command-center\sync_repos.py"
+
 REM --- AI Command Center (Port 8500) ---
 start "AI Command Center" /min /d "%ROOT%ai-command-center" ".venv\Scripts\streamlit.exe" run app.py --server.port 8500 --server.headless true
 

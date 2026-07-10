@@ -31,7 +31,8 @@ def external_url(url: str) -> str:
 # Dieses Projekt liegt im Monorepo …\repos\dashboard\ai-command-center.
 # Vault und andere Repos werden als Geschwister von "dashboard" erwartet.
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent
-_REPOS_ROOT = _PROJECT_ROOT.parent.parent
+REPOS_ROOT = _PROJECT_ROOT.parent.parent
+_REPOS_ROOT = REPOS_ROOT
 
 # Pfad zum Obsidian-Vault. Per Umgebungsvariable VAULT_PATH überschreibbar,
 # damit die App auch von anderen Geräten aus läuft.

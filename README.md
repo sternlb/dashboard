@@ -63,6 +63,21 @@ Push mit `git status` gegenprüfen.
 | `DASHBOARD_HOST` | LAN-IP (auto) | Host für Links auf andere Geräte |
 | `CLAUDE_PROJECTS_DIR` | `~\.claude\projects` | Claude-Code-Logs (Token-Sektion) |
 
+## Repo-Sync (Sub-Pages aktuell halten)
+
+Die Landing-Sub-Pages `/gdp` und `/datb` und die Vault-Inhalte werden von der
+Platte serviert — damit sie dem GitHub-Stand entsprechen, pullt der Repo-Sync
+alle `repos.toml`-Einträge mit `sync = true` (Unterrichts-Repos + Vault):
+
+- **Automatisch beim Start:** `start_dashboards.bat` und `start_dashboards_hidden.vbs`
+  rufen vor dem Serverstart `python ai-command-center\sync_repos.py` auf.
+- **Manuell im Dashboard:** Button „⟳ Repos aktualisieren" in der GitHub-Sektion
+  des Command Centers (Port 8500) — Ergebnis wird pro Repo angezeigt.
+
+Sicherheitsregeln: Repos mit lokalen (getrackten) Änderungen werden übersprungen,
+kein `--force`, Konflikte werden nur gemeldet. Untracked Dateien blockieren nicht.
+Logik in `ai-command-center/command_center/repo_sync.py`.
+
 ## Autostart (Windows-Login)
 
 Verknüpfung im Startup-Ordner anlegen: `Win+R` → `shell:startup` → Verknüpfung

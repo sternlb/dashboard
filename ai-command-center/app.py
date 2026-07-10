@@ -15,6 +15,7 @@ from command_center import theme
 from command_center.calendar_google import CalEvent, load_events
 from command_center.config import LAN_IP, TRADING_URL, VAULT_PATH, external_url
 from command_center.github import load_repos
+from command_center.repo_sync import sync_repos
 from command_center.trading import load_trading_summary
 from command_center.usage import (
     TokenState,
@@ -292,9 +293,42 @@ def _rel_days(dt: datetime | None) -> str:
     return "vor 1 Monat" if m == 1 else f"vor {m} Monaten"
 
 
+_SYNC_BADGES = {
+    "updated": ("🟢", "aktualisiert"),
+    "up_to_date": ("⚪", "aktuell"),
+    "skipped_dirty": ("🟡", "übersprungen"),
+    "missing": ("🟡", "fehlt lokal"),
+    "error": ("🔴", "Fehler"),
+}
+
+
+def repo_sync_button() -> None:
+    """Button: git pull für die lokalen Klone (sync = true in repos.toml)."""
+    if not st.button(
+        "⟳ Repos aktualisieren",
+        help="git pull für Unterrichts-Repos + Vault — Sub-Pages (/gdp, /datb) und Landing Page sind danach sofort aktuell.",
+    ):
+        return
+    with st.spinner("Hole Stand von GitHub …"):
+        results = sync_repos()
+    _cached_repos.clear()
+    lines = ""
+    for r in results:
+        dot, word = _SYNC_BADGES.get(r.state, ("⚪", r.state))
+        lines += (
+            f'<div style="display:flex;gap:8px;align-items:baseline;font-size:13px;">'
+            f"<span>{dot}</span>"
+            f'<span style="color:#FAFAF5;">{_esc(r.icon)} {_esc(r.label or r.name)}</span>'
+            f'<span class="acc-mono" style="color:#9CA3AF;font-size:11px;">{word} · {_esc(r.detail)}</span>'
+            f"</div>"
+        )
+    st.markdown(lines, unsafe_allow_html=True)
+
+
 def github_section() -> None:
     eyebrow("GitHub · sternlb")
     st.markdown('<h2 class="acc-section-h">Deine Repos</h2>', unsafe_allow_html=True)
+    repo_sync_button()
     res = _cached_repos()
 
     if res.state != "ok":

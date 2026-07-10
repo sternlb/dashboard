@@ -6,6 +6,9 @@ Set sh = CreateObject("WScript.Shell")
 Set fso = CreateObject("Scripting.FileSystemObject")
 root = fso.GetParentFolderName(WScript.ScriptFullName)
 
+' --- Repo-Sync: Unterrichts-Repos + Vault von GitHub ziehen (wartet auf Ende) ---
+sh.Run "python """ & root & "\ai-command-center\sync_repos.py""", 0, True
+
 ' --- AI Command Center (Port 8500) ---
 sh.CurrentDirectory = root & "\ai-command-center"
 sh.Run """" & root & "\ai-command-center\.venv\Scripts\streamlit.exe"" run app.py --server.port 8500 --server.headless true", 0, False

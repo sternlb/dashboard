@@ -48,6 +48,28 @@ Das Dashboard läuft auf diesem Rechner und ist im Heimnetz erreichbar:
 - [x] Schritt 6 — Design v2 (Ambient-Hintergrund, Animationen, Sticky-Topbar, Begrüßung) + Multi-Device: responsive CSS, LAN-Zugriff für Handy/Laptop
 - [x] Schritt 7 — Kanban interaktiv: Karten per Drag & Drop verschieben (streamlit-sortables), schreibt direkt in `01 Inbox/Kanban.md` zurück (einzige Schreiboperation ins Vault; Frontmatter + Plugin-Settings bleiben erhalten)
 
+## Gepatchte Kanban-Komponente (`streamlit_sortables/` im Projektordner)
+
+Das Verzeichnis `streamlit_sortables/` ist eine **vendored, gepatchte Kopie**
+des PyPI-Pakets `streamlit-sortables` 0.3.1. Sie liegt bewusst neben `app.py`
+und schattet dadurch das pip-installierte Paket (Streamlit legt den
+Skript-Ordner vorn auf den `sys.path`). **Nicht löschen** — sonst kommt der
+Bug zurück:
+
+- **Bug:** React error #185 („Maximum update depth exceeded") beim Drag & Drop,
+  wenn eine Karte genau auf der Grenze zwischen zwei Spalten schwebt. dnd-kit
+  flippt dann schnell zwischen den Spalten hin und her, jedes Flip ruft
+  `setItems` in `onDragOver` auf → Endlosschleife → „Component Error" im Board.
+  Bekanntes Upstream-Problem (dnd-kit issue #1678), kein Fix in
+  streamlit-sortables ≤ 0.3.1.
+- **Patch (11.07.2026):** Move-Lock in `onDragOver` — maximal ein
+  Spaltenwechsel pro 150 ms, direkt im gebauten Bundle
+  `frontend/build/static/js/main.4a88f4bb.js` (umbenannt von `…4a88f4ba.js`
+  als Cache-Buster; `index.html`/`asset-manifest.json` angepasst). Außerdem
+  Debug-`console.log`s entfernt.
+- Bei einem künftigen Upstream-Release: neue Version testen und, falls dort
+  gefixt, die vendored Kopie entfernen und `requirements.txt` anheben.
+
 ## Autostart (alle Dashboards beim Login)
 
 - `start_dashboards.bat` — startet AI Command Center (8500) + Trading Agent (8501), sichtbar-minimiert. Für manuellen Start.

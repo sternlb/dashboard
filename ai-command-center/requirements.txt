@@ -1,6 +1,8 @@
-streamlit>=1.40
+﻿streamlit>=1.40
 python-frontmatter>=1.1
 google-api-python-client>=2.100
 google-auth-oauthlib>=1.2
 google-auth-httplib2>=0.2
+# Wird von der vendored, gepatchten Kopie streamlit_sortables/ im Projektordner
+# geschattet (React-#185-Fix, siehe README) — Eintrag bleibt als Fallback/Doku.
 streamlit-sortables>=0.3

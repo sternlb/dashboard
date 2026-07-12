@@ -17,9 +17,11 @@ Routen:
                   (nur erlaubte Endungen, kein Pfad-Traversal). Die Repos
                   nutzen nur relative Links, daher funktionieren dieselben
                   Dateien unveraendert auch direkt per file:// im Klon.
-  /<Dateiname> -> beliebige Datei aus dem Basel-AI-Ordner (nur erlaubte
-                  Endungen, kein Pfad-Traversal) — damit funktionieren die
-                  relativen Links des Kurs-Katalogs auf Foliensets & ZIPs.
+  /<Pfad>      -> beliebige Datei aus dem Basel-AI-Ordner inkl. Unterordner
+                  (nur erlaubte Endungen, kein Pfad-Traversal) — damit
+                  funktionieren die relativen Links des Kurs-Katalogs auf
+                  Foliensets & ZIPs sowie die Screenshots der User Stories
+                  (Unterordner "User Story Assets").
 """
 from __future__ import annotations
 
@@ -104,8 +106,9 @@ class LandingHandler(BaseHTTPRequestHandler):
             name = path.lstrip("/")
         target = (BASE_DIR / name).resolve()
 
-        # Nur Dateien direkt im Basel-AI-Ordner.
-        if target.parent != BASE_DIR.resolve():
+        # Nur Dateien innerhalb des Basel-AI-Ordners (inkl. Unterordner
+        # wie "User Story Assets", kein Pfad-Traversal).
+        if BASE_DIR.resolve() not in target.parents:
             self._not_found()
             return
         self._serve_file(target)

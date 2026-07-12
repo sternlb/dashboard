@@ -17,6 +17,8 @@ Routen:
                   (nur erlaubte Endungen, kein Pfad-Traversal). Die Repos
                   nutzen nur relative Links, daher funktionieren dieselben
                   Dateien unveraendert auch direkt per file:// im Klon.
+  /02 Projekte/…, /10 Anhang/Podcasts/… -> Vault-Ordner fuer die
+                  "../../"-Links der User Stories (Lektionen + Lern-Podcast).
   /<Pfad>      -> beliebige Datei aus dem Basel-AI-Ordner inkl. Unterordner
                   (nur erlaubte Endungen, kein Pfad-Traversal) — damit
                   funktionieren die relativen Links des Kurs-Katalogs auf
@@ -45,9 +47,18 @@ ROUTES = {
     "/kurse": "Kurs-Katalog Basel-AI.html",
 }
 # Unterrichts-Repos: Mount-Pfad -> Wurzelordner, rekursiv serviert.
+# Dazu die Vault-Ordner, auf die die User Stories relativ verweisen
+# ("../../02 Projekte/…", "../../10 Anhang/Podcasts/…"): der Browser
+# normalisiert diese Pfade zu "/02 Projekte/…" bzw. "/10 Anhang/…",
+# daher funktionieren dieselben relativen Links per HTTP und file://.
+# Bewusst nur diese beiden Ordner (Unterrichtsmaterial + Podcasts),
+# nicht der ganze Vault — private Projekte bleiben unerreichbar.
+_VAULT = BASE_DIR.parents[1]
 MOUNTS = {
     "/gdp": Path(os.environ.get("GDP_DIR", _REPOS / "2526_KI1_GdP_C")),
     "/datb": Path(os.environ.get("DATB_DIR", _REPOS / "2526_KI1_DatB")),
+    "/02 Projekte": _VAULT / "02 Projekte",
+    "/10 Anhang/Podcasts": _VAULT / "10 Anhang" / "Podcasts",
 }
 CONTENT_TYPES = {
     ".html": "text/html; charset=utf-8",

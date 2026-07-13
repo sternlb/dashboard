@@ -42,6 +42,13 @@ desc = "Datenbanken · alle Stunden"
 status = "aktiv"
 
 [[tool]]
+name = "Leo-EMS"
+icon = "⚡"
+url = "https://claude.ai/code/artifact/fa6d0bf5-9209-4d09-90ca-8cfe2766f6f5"
+desc = "Energy Management · Doku (Haupt-Cockpit) → Live-Vergleich EMS ↔ EVCC"
+status = "aktiv"
+
+[[tool]]
 name = "Neues Tool"
 icon = "➕"
 url = ""

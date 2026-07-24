@@ -16,6 +16,7 @@ from command_center.calendar_google import CalEvent, load_events
 from command_center.config import LAN_IP, TRADING_URL, VAULT_PATH, external_url
 from command_center.github import load_repos
 from command_center.repo_sync import sync_repos
+from command_center.scan_log import ScanEntry, load_scan_log
 from command_center.trading import load_trading_summary
 from command_center.usage import (
     TokenState,
@@ -48,6 +49,11 @@ def _cached_usage():
 @st.cache_data(ttl=600)
 def _cached_repos():
     return load_repos()
+
+
+@st.cache_data(ttl=60)
+def _cached_scan_log():
+    return load_scan_log()
 
 
 def _fmt_tok(n: int) -> str:
@@ -363,6 +369,85 @@ def github_section() -> None:
     st.caption("Live über die GitHub CLI · Klick öffnet das Repo · Liste in repos.toml pflegen.")
 
 
+# --- Scanner-Ablage ----------------------------------------------------------
+_SCAN_BADGES = {
+    "kopiert": ("📄", theme.LIME, "abgelegt"),
+    "übersprungen": ("⏭", theme.GELB, "übersprungen"),
+    "fehler": ("⚠", theme.ROT, "Fehler"),
+}
+
+
+def _scan_when(e: ScanEntry) -> str:
+    if not e.when:
+        return e.when_raw or "—"
+    d = e.when
+    return f"{_WD[d.weekday()]} {d.day:02d}.{d.month:02d} · {d.hour:02d}:{d.minute:02d}"
+
+
+def _scan_row(e: ScanEntry) -> str:
+    icon, color, word = _SCAN_BADGES.get(e.action, ("•", theme.SAGE, e.action or "—"))
+    title = e.target_name or e.source_name or "—"
+    full = f"{e.target_dir}\\{e.target_name}" if e.target_dir else e.source_dir
+
+    trail = e.short_dir()
+    if trail:
+        # Abgelegt: Zielordner + woher die Datei kam.
+        sub = (
+            f'<span style="color:{theme.LIME};">↳ {_esc(trail)}</span>'
+            f'<span style="color:rgba(250,250,245,0.35);"> · aus {_esc(e.source_name)}</span>'
+        )
+    else:
+        # Ohne Ziel (übersprungen/Fehler) steht oben schon der Quellname.
+        sub = f'<span style="color:#9CA3AF;">{_esc(e.note) or "kein Ziel"}</span>'
+    person = (
+        f'<span class="acc-badge" style="color:#FAFAF5;">{_esc(e.person)}</span>'
+        if e.person
+        else ""
+    )
+
+    return (
+        '<div style="display:flex;gap:14px;align-items:flex-start;padding:10px 0;'
+        'border-bottom:1px solid rgba(255,255,255,0.07);">'
+        f'<span class="acc-mono" style="font-size:12px;color:{color};min-width:118px;'
+        f'padding-top:2px;">{icon} {_scan_when(e)}</span>'
+        '<span style="flex:1;min-width:0;">'
+        f'<span style="font-size:14px;color:#FAFAF5;word-break:break-word;" '
+        f'title="{_esc(full)}">{_esc(title)}</span>'
+        '<span style="display:block;font-size:11.5px;color:rgba(250,250,245,0.5);'
+        f'margin-top:3px;word-break:break-word;">{sub}</span></span>'
+        f'<span style="display:flex;gap:6px;align-items:center;flex-shrink:0;">{person}'
+        f'<span class="acc-badge" style="color:{color};">{_esc(word)}</span></span>'
+        "</div>"
+    )
+
+
+def scan_section() -> None:
+    eyebrow("Scanner · Brother ADS-1700W")
+    st.markdown(
+        '<h2 class="acc-section-h">Zuletzt einsortiert</h2>', unsafe_allow_html=True
+    )
+    res = _cached_scan_log()
+
+    if res.state != "ok":
+        hints = {
+            "missing": f"Noch kein Logbuch — entsteht beim ersten Scan unter {res.path}.",
+            "empty": "Logbuch ist noch leer — der erste verarbeitete Scan landet hier.",
+            "error": f"Logbuch nicht lesbar: {res.detail[:160]}",
+        }
+        st.markdown(
+            placeholder_block("Scanner-Ablage — keine Einträge", hints.get(res.state, res.detail)),
+            unsafe_allow_html=True,
+        )
+        return
+
+    rows = "".join(_scan_row(e) for e in res.entries)
+    st.markdown(f"<div>{rows}</div>", unsafe_allow_html=True)
+    st.caption(
+        f"Die letzten {len(res.entries)} von {res.total} Bewegungen · "
+        f"Ziel = Personen-Inbox + Typ-Unterordner · Vollständiges Logbuch: {res.path}"
+    )
+
+
 # --- Skills ------------------------------------------------------------------
 def skills_section() -> None:
     skills = load_skills()
@@ -646,6 +731,8 @@ def main() -> None:
     projects_section()
     section_gap()
     github_section()
+    section_gap()
+    scan_section()
     section_gap()
     skills_section()
     section_gap()

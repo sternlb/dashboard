@@ -77,6 +77,14 @@ CLAUDE_PROJECTS_DIR = Path(
 # Manueller Free-Credit-Rest (gitignored) — Anthropic bietet keinen Balance-API.
 TOKEN_STATE_FILE = _PROJECT_ROOT / "token_state.json"
 
+# --- Scanner-Workflow (Bewegungs-Logbuch) ------------------------------------
+# Das Repo scan-workflow ist ein Geschwister-Repo unter …\repos\. Es schreibt bei
+# jeder Ablage eine Zeile in scan_log.csv (Semikolon-CSV); wir lesen sie read-only.
+SCAN_LOG_FILE = Path(
+    os.environ.get("SCAN_LOG_PATH", _REPOS_ROOT / "scan-workflow" / "scan_log.csv")
+)
+SCAN_LOG_LIMIT = int(os.environ.get("SCAN_LOG_LIMIT", "10"))
+
 # --- Trading Agent (eingehängtes Fachdashboard) ------------------------------
 # Geschwister-Projekt im selben Monorepo (…\dashboard\trading-agent).
 TRADING_AGENT_DIR = Path(

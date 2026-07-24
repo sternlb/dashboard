@@ -95,6 +95,10 @@ Bug zurück:
   **read/write**: Drag & Drop im Dashboard schreibt die Datei um; Karten in der
   Erledigt-Spalte werden `- [x]`, alle anderen `- [ ]`
 - Tools: `tools.toml` (im Projekt, für den Launcher)
+- Scanner-Ablage: `..\..\scan-workflow\scan_log.csv` (Geschwister-Repo, read-only) —
+  Bewegungs-Logbuch des Scanner-Workflows, Section „Zuletzt einsortiert" zeigt die
+  letzten 10 Einträge. Pfad per `SCAN_LOG_PATH` überschreibbar, Anzahl per
+  `SCAN_LOG_LIMIT`. Fehlt die Datei, erscheint ein Hinweis-Platzhalter.
 
 ## Architektur
 
@@ -108,5 +112,8 @@ command_center/
   calendar_google.py   Google-Kalender (read-only)
   usage.py             Token-Nutzung (Claude-Code-Logs) + Free-Credit
   trading.py           Trading-Agent-Depot (read-only aus dessen Daten)
+  github.py            Repo-Übersicht über die gh CLI
+  repo_sync.py         git pull für die lokalen Klone
+  scan_log.py          Scanner-Bewegungslog (read-only aus scan-workflow)
 ```
 Alle Reader sind Streamlit-frei und fangen fehlende Quellen sauber ab.

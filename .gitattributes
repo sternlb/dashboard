@@ -1,0 +1,11 @@
+# Auf diesem Rechner steht core.autocrlf=true. Skripte, die im Linux-Container
+# laufen, müssen zwingend LF behalten — mit CRLF scheitert der Start mit
+# "bad interpreter: /usr/bin/env bash^M".
+*.sh text eol=lf
+dashboards/Dockerfile text eol=lf
+*.yaml text eol=lf
+
+# Windows-Startskripte bleiben CRLF.
+*.bat text eol=crlf
+*.vbs text eol=crlf
+*.ps1 text eol=crlf

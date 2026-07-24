@@ -1,0 +1,49 @@
+name: Leo Dashboards
+version: "0.1.0"
+slug: leo_dashboards
+description: AI Command Center, Trading Agent und Landing Page als Dauerbetrieb auf dem HA-Host
+url: https://github.com/sternlb/dashboard
+arch:
+  - aarch64
+  - amd64
+startup: application
+boot: auto
+init: false
+
+# Feste LAN-Ports statt Ingress: Streamlit unter dem zufälligen Ingress-Sub-Pfad
+# ist wegen Websockets + baseUrlPath fragil. Die Dashboards sind LAN-only.
+ports:
+  8500/tcp: 8500
+  8501/tcp: 8501
+  8502/tcp: 8502
+ports_description:
+  8500/tcp: AI Command Center (Streamlit)
+  8501/tcp: Trading Agent (Streamlit)
+  8502/tcp: Landing Page, Kurs-Katalog, /gdp, /datb (stdlib-HTTP)
+
+# Supervisor startet das Add-on neu, wenn das Command Center nicht mehr antwortet.
+watchdog: tcp://[HOST]:[PORT:8500]
+
+# Die geklonten Repos liegen in /share/repos und überleben damit Add-on-Updates.
+map:
+  - share:rw
+
+options:
+  dashboard_host: ""
+  github_owner: sternlb
+  github_token: ""
+  vault_writeback: true
+  git_user_name: Leo Dashboards
+  git_user_email: leonhardbasel84@googlemail.com
+schema:
+  # Pflicht: im Container liefert der Routing-Lookup in config.py die
+  # Docker-Bridge-IP (172.30.x.x) und zerschießt damit alle Kachel-Links.
+  dashboard_host: str
+  github_owner: str
+  # Fine-grained PAT: Contents:read auf dashboard, 2526_KI1_GdP_C, 2526_KI1_DatB
+  # und SecondBrain-Leo; Contents:write nur auf SecondBrain-Leo (Kanban-Rückschreiben).
+  github_token: password
+  # false = Kanban im Dashboard nur lesen. Dann braucht das Token kein write.
+  vault_writeback: bool
+  git_user_name: str
+  git_user_email: str

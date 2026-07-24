@@ -62,6 +62,28 @@ Push mit `git status` gegenprüfen.
 | `GDP_DIR` / `DATB_DIR` | `..\2526_KI1_GdP_C` / `..\2526_KI1_DatB` | Unterrichts-Repos für /gdp, /datb |
 | `DASHBOARD_HOST` | LAN-IP (auto) | Host für Links auf andere Geräte |
 | `CLAUDE_PROJECTS_DIR` | `~\.claude\projects` | Claude-Code-Logs (Token-Sektion) |
+| `SCAN_LOG_PATH` | `..\scan-workflow\scan_log.csv` | Scanner-Bewegungslog |
+| `VAULT_WRITEBACK` | `true` | Darf das Kanban ins Vault schreiben? `false` = nur lesen |
+| `VAULT_AUTOCOMMIT` | `false` | Nach dem Kanban-Schreiben committen **und pushen**. Auf dem PC bewusst aus (dort committest du selbst), im Serverbetrieb an — siehe unten |
+
+## Dauerbetrieb auf dem HA-Host (Add-on)
+
+Damit die Dashboards nicht am eingeschalteten Windows-PC hängen, liegt in
+[`dashboards/`](dashboards/) ein Home-Assistant-Add-on, das Command Center,
+Trading Agent und Landing Page auf den Ports 8500/8501/8502 fährt.
+Einrichtung, Optionen und Abnahme: [`dashboards/DOCS.md`](dashboards/DOCS.md).
+
+Zwei Dinge, die man dabei wissen muss:
+
+- **`dashboard_host` ist Pflicht.** Im Container liefert der Routing-Lookup in
+  `config.py` die Docker-Bridge-IP (`172.30.x.x`) statt der LAN-IP — ohne die
+  Option zeigen sämtliche Kachel-Links ins Leere.
+- **`VAULT_AUTOCOMMIT` gehört im Serverbetrieb an.** Das Kanban-Rückschreiben
+  macht den dortigen Vault-Klon sonst dirty, und `repo_sync` überspringt einen
+  dirty Klon dauerhaft (`skipped_dirty`) — der Server würde ab dem ersten
+  Kanban-Klick still von GitHub wegdriften. Mit der Option wird der Schreibvorgang
+  committet und gepusht; bei abgelehntem Push (paralleles Gerät war schneller)
+  meldet das Dashboard das sichtbar, ohne `--force` und ohne Auto-Rebase.
 
 ## Repo-Sync (Sub-Pages aktuell halten)
 

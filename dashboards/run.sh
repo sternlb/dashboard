@@ -1,0 +1,164 @@
+#!/usr/bin/env bash
+# ==============================================================================
+#  Leo Dashboards — Add-on-Entrypoint
+#
+#  Holt den App-Code zur Laufzeit per git (nicht ins Image gebacken), damit ein
+#  "auf Windows pushen -> Add-on neu starten" reicht. Nur Änderungen an
+#  requirements.txt erfordern einen Versions-Bump + Image-Rebuild.
+#
+#  Startet drei Prozesse und beendet sich, sobald einer stirbt — der Supervisor
+#  startet das Add-on dann neu (boot: auto + watchdog auf 8500).
+# ==============================================================================
+set -o pipefail
+
+OPTIONS=/data/options.json
+REPOS=/share/repos
+VENV=/opt/venv
+PY="${VENV}/bin/python"
+
+log()  { echo "[$(date '+%H:%M:%S')] $*"; }
+fail() { echo "[$(date '+%H:%M:%S')] FEHLER: $*" >&2; exit 1; }
+opt()  { jq -r --arg k "$1" '.[$k] // empty' "$OPTIONS" 2>/dev/null; }
+
+# --- Optionen ---------------------------------------------------------------
+DASHBOARD_HOST=$(opt dashboard_host)
+GITHUB_OWNER=$(opt github_owner)
+GITHUB_TOKEN=$(opt github_token)
+VAULT_WRITEBACK=$(opt vault_writeback)
+GIT_USER_NAME=$(opt git_user_name)
+GIT_USER_EMAIL=$(opt git_user_email)
+
+[ -n "$DASHBOARD_HOST" ] || fail "Option 'dashboard_host' ist leer. Ohne sie ermittelt config.py die Docker-Bridge-IP (172.30.x.x) und alle Kachel-Links zeigen ins Leere. Trage die LAN-IP des HA-Hosts ein, z. B. 192.168.178.150."
+[ -n "$GITHUB_TOKEN" ]   || fail "Option 'github_token' ist leer. Die Repos sind privat und lassen sich ohne Token nicht klonen."
+
+# --- Git-Setup --------------------------------------------------------------
+# credential.helper store statt Token in der Remote-URL: sonst landet das Token
+# dauerhaft in .git/config unter /share.
+printf 'https://x-access-token:%s@github.com\n' "$GITHUB_TOKEN" > /root/.git-credentials
+chmod 600 /root/.git-credentials
+git config --global credential.helper store
+git config --global user.name  "$GIT_USER_NAME"
+git config --global user.email "$GIT_USER_EMAIL"
+# /share gehört einer anderen UID -> git verweigert sonst mit "dubious ownership".
+git config --global --add safe.directory '*'
+
+# gh CLI authentifiziert sich über die Umgebung, kein interaktives gh auth login.
+export GH_TOKEN="$GITHUB_TOKEN"
+
+# --- Repos holen ------------------------------------------------------------
+mkdir -p "$REPOS"
+
+sync_repo() {
+    local name="$1" dir="${REPOS}/$1"
+    if [ -d "${dir}/.git" ]; then
+        log "pull  ${name}"
+        if ! git -C "$dir" pull --ff-only 2>&1 | sed 's/^/        /'; then
+            log "WARN  ${name}: pull fehlgeschlagen, arbeite mit lokalem Stand weiter"
+        fi
+    else
+        log "clone ${name}"
+        git clone "https://github.com/${GITHUB_OWNER}/${name}.git" "$dir" 2>&1 | sed 's/^/        /' \
+            || fail "${name} konnte nicht geklont werden. Token-Scope prüfen (Contents:read)."
+    fi
+}
+
+sync_repo dashboard
+sync_repo SecondBrain-Leo
+sync_repo 2526_KI1_GdP_C
+sync_repo 2526_KI1_DatB
+
+DASH="${REPOS}/dashboard"
+CC="${DASH}/ai-command-center"
+TA="${DASH}/trading-agent"
+LP="${DASH}/basel-ai-landing"
+
+# --- Secrets aus /data verlinken --------------------------------------------
+# /data ist persistent und liegt im HA-Backup; die Dateien sind gitignored,
+# die Repo-Arbeitskopie bleibt dadurch sauber (wichtig für repo_sync).
+link_secret() {
+    local src="/data/$1" dst="$2"
+    if [ -f "$src" ]; then
+        mkdir -p "$(dirname "$dst")"
+        ln -sf "$src" "$dst"
+    else
+        log "WARN  /data/$1 fehlt — abhängige Kachel bleibt leer"
+    fi
+}
+
+link_secret credentials.json "${CC}/credentials.json"
+link_secret token.json       "${CC}/token.json"
+link_secret token_state.json "${CC}/token_state.json"
+link_secret holdings.csv     "${TA}/data/holdings.csv"
+
+# --- Drift-Sicherung --------------------------------------------------------
+# Die Deps stecken im Image. Falls eine App-requirements.txt seit dem letzten
+# Image-Build gewachsen ist, hier nachziehen statt beim Import abzustürzen.
+for req in "${CC}/requirements.txt" "${TA}/requirements.txt"; do
+    [ -f "$req" ] || continue
+    "${VENV}/bin/pip" install --quiet --disable-pip-version-check -r "$req" 2>&1 | sed 's/^/        /' \
+        || log "WARN  pip-Nachinstallation aus ${req} fehlgeschlagen"
+done
+
+# --- Umgebung für die Apps --------------------------------------------------
+export DASHBOARD_HOST                      # sonst Docker-Bridge-IP in allen Links
+export VAULT_PATH="${REPOS}/SecondBrain-Leo"
+export TRADING_AGENT_DIR="${TA}"
+export TRADING_URL="http://${DASHBOARD_HOST}:8501"
+# Von Windows gespiegelt (siehe DOCS.md); fehlen sie, bleiben die Kacheln leer.
+export CLAUDE_PROJECTS_DIR=/share/claude-logs
+export SCAN_LOG_PATH=/share/scan/scan_log.csv
+# Kanban-Rückschreiben. AUTOCOMMIT ist auf dem Dev-PC aus und hier an: ohne
+# commit+push bliebe dieser Klon dirty und repo_sync würde ihn ab dem ersten
+# Kanban-Klick dauerhaft überspringen.
+export VAULT_WRITEBACK="${VAULT_WRITEBACK}"
+export VAULT_AUTOCOMMIT="${VAULT_WRITEBACK}"
+
+log "Host ${DASHBOARD_HOST} · Vault ${VAULT_PATH} · Writeback ${VAULT_WRITEBACK}"
+
+# --- Dienste starten --------------------------------------------------------
+declare -a PIDS=()
+
+log "start Landing Page      :8502"
+( cd "$LP" && exec "$PY" app.py ) &
+PIDS+=($!)
+
+log "start Trading Agent     :8501"
+( cd "$TA" && exec "${VENV}/bin/streamlit" run app.py \
+    --server.port 8501 --server.address 0.0.0.0 --server.headless true ) &
+PIDS+=($!)
+
+log "start AI Command Center :8500"
+( cd "$CC" && exec "${VENV}/bin/streamlit" run app.py \
+    --server.port 8500 --server.address 0.0.0.0 --server.headless true ) &
+PIDS+=($!)
+
+# Ersetzt den Windows-Task "TradingAgent_WatchlistUpdate" (montags 09:00).
+# Marker in /data macht den Lauf idempotent über Neustarts hinweg.
+watchlist_loop() {
+    while true; do
+        if [ "$(date +%u)" = "1" ] && [ "$(date +%H)" = "09" ]; then
+            local marker="/data/.watchlist-$(date +%F)"
+            if [ ! -f "$marker" ]; then
+                log "Watchlist-Update"
+                ( cd "$TA" && "$PY" update_watchlist.py ) && touch "$marker"
+            fi
+        fi
+        sleep 600
+    done
+}
+watchlist_loop &
+PIDS+=($!)
+
+cleanup() {
+    log "stoppe Dienste"
+    kill "${PIDS[@]}" 2>/dev/null
+    wait 2>/dev/null
+}
+trap cleanup EXIT INT TERM
+
+log "alle Dienste laufen"
+
+# Sobald ein Dienst stirbt, geht das ganze Add-on runter — der Supervisor
+# startet es neu. Besser ein sichtbarer Neustart als ein stilles Teil-Dashboard.
+wait -n "${PIDS[@]}"
+fail "ein Dienst hat sich beendet — Add-on wird neu gestartet"

@@ -1,0 +1,24 @@
+# Laufzeit-Abhängigkeiten des Add-ons — Vereinigung der drei App-Requirements.
+#
+# Bewusst hier dupliziert, weil der Docker-Build-Kontext nur dieser Ordner ist
+# und der App-Code selbst erst zur Laufzeit per git geholt wird. run.sh gleicht
+# beim Start Drift gegen die echten requirements.txt der Apps ab, damit eine
+# vergessene Änderung hier nicht sofort zum Absturz führt.
+#
+# Änderungen hier = Add-on-Version in config.yaml hochzählen (Image-Rebuild).
+
+# --- ai-command-center ---
+streamlit>=1.40
+python-frontmatter>=1.1
+google-api-python-client>=2.100
+google-auth-oauthlib>=1.2
+google-auth-httplib2>=0.2
+streamlit-sortables>=0.3
+
+# --- trading-agent ---
+yfinance>=0.2.50
+pandas>=2.2
+plotly>=5.24
+
+# --- basel-ai-landing ---
+# keine: reiner stdlib-HTTP-Server

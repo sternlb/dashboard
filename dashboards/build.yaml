@@ -1,0 +1,14 @@
+# Basis-Images je Architektur — der HA-Supervisor wählt anhand der Hardware.
+# Leos HA: Raspberry Pi 5 → aarch64. amd64 zusätzlich, falls das Add-on später
+# auf einer x86-Kiste (QNAP Container Station) laufen soll.
+#
+# WICHTIG — Debian, nicht Alpine:
+# Streamlit zieht pyarrow als harte Abhängigkeit. Für musl/Alpine gibt es davon
+# kein Wheel, pip müsste Arrow C++ aus dem Quellcode bauen — das scheitert auf
+# dem Pi praktisch immer. Debian trixie liefert glibc, damit greifen die
+# manylinux-aarch64-Wheels für numpy/pandas/pyarrow.
+# (Die HA-eigenen base-python-Images sind ausschließlich Alpine, daher Debian
+# + python3 aus dem Paketmanager. trixie = Python 3.13.5, wie auf Leos PC.)
+build_from:
+  aarch64: ghcr.io/home-assistant/aarch64-base-debian:trixie-2026.03.0
+  amd64: ghcr.io/home-assistant/amd64-base-debian:trixie-2026.03.0

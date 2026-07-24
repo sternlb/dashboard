@@ -44,6 +44,24 @@ VAULT_PATH = Path(os.environ.get("VAULT_PATH", _DEFAULT_VAULT))
 # Name des Vaults für obsidian:// Deep-Links (= Vault-Ordnername).
 VAULT_NAME = os.environ.get("VAULT_NAME", "SecondBrain-Leo")
 
+
+# --- Vault-Schreibzugriff ----------------------------------------------------
+def _flag(name: str, default: bool) -> bool:
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    return raw.strip().lower() in {"1", "true", "yes", "on"}
+
+
+# Kanban-Drag&Drop ist die einzige Schreiboperation ins Vault.
+VAULT_WRITEBACK = _flag("VAULT_WRITEBACK", True)
+
+# Nach dem Schreiben committen und pushen. Auf dem Dev-PC aus (dort committet
+# Leo das Vault selbst), im Server-Betrieb an. Sonst wird der Server-Klon durch
+# den ersten Kanban-Klick dirty, repo_sync überspringt ihn ab da dauerhaft
+# (state "skipped_dirty") und der Server läuft still von GitHub weg.
+VAULT_AUTOCOMMIT = _flag("VAULT_AUTOCOMMIT", False)
+
 # Projekt-Quellen: (Unterordner im Vault, Kategorie-Label).
 PROJEKT_DIRS = [
     ("02 Projekte", "Beruflich"),

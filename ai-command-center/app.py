@@ -531,8 +531,12 @@ def kanban_section() -> None:
             )
             for c in result
         ]
-        save_kanban(new_cols)
+        problem = save_kanban(new_cols)
         st.session_state.kanban_saved = result
+        # Im Server-Betrieb wird zusätzlich committet und gepusht. Scheitert das,
+        # muss es sichtbar sein — sonst laufen Server- und GitHub-Stand auseinander.
+        if problem:
+            st.warning(f"Kanban gespeichert, aber: {problem}")
 
     st.caption(
         "Karten per Drag & Drop verschieben — Änderungen landen direkt in "

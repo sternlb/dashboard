@@ -14,9 +14,12 @@ from .config import (
     PROJEKT_DIRS,
     SKILLS_FILE,
     TOOLS_FILE,
+    VAULT_AUTOCOMMIT,
     VAULT_NAME,
     VAULT_PATH,
+    VAULT_WRITEBACK,
 )
+from .repo_sync import commit_and_push
 
 
 @dataclass
@@ -178,14 +181,18 @@ class KanbanColumn:
     items: list[KanbanItem] = field(default_factory=list)
 
 
-def save_kanban(columns: list[KanbanColumn], path: Path | None = None) -> None:
+def save_kanban(columns: list[KanbanColumn], path: Path | None = None) -> str:
     """Kanban-Spalten zurück in die Markdown-Datei schreiben (Obsidian-Kanban-Format).
 
     Einzige Schreiboperation ins Vault. Frontmatter und der
     ``%% kanban:settings %%``-Block des Obsidian-Plugins bleiben erhalten,
     nur die Spalten/Karten dazwischen werden neu aufgebaut.
+
+    Rückgabe: "" wenn alles glatt lief, sonst eine Meldung für die UI.
     """
     path = path or KANBAN_FILE
+    if not VAULT_WRITEBACK:
+        return "Schreibzugriff aufs Vault ist deaktiviert (VAULT_WRITEBACK=false)."
     original = path.read_text(encoding="utf-8") if path.exists() else ""
 
     head = ""
@@ -209,6 +216,15 @@ def save_kanban(columns: list[KanbanColumn], path: Path | None = None) -> None:
     if settings:
         out += "\n" + settings + "\n"
     path.write_text(out, encoding="utf-8", newline="\n")
+
+    if not VAULT_AUTOCOMMIT:
+        return ""
+    try:
+        rel = path.resolve().relative_to(VAULT_PATH.resolve()).as_posix()
+    except ValueError:
+        # Datei liegt außerhalb des Vaults — dann gibt es nichts zu committen.
+        return ""
+    return commit_and_push(VAULT_PATH, rel, "Kanban: Stand aus dem Command Center")
 
 
 def load_kanban(path: Path | None = None) -> list[KanbanColumn]:

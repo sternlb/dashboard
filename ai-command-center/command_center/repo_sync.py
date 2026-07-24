@@ -110,6 +110,44 @@ def sync_repos(path: Path | None = None) -> list[SyncResult]:
     return results
 
 
+def commit_and_push(repo: Path, rel_path: str, message: str) -> str:
+    """Eine einzelne Datei committen und pushen. Rückgabe: "" = ok, sonst Grund.
+
+    Für den Server-Betrieb: dort schreibt das Dashboard ins Vault, und ohne
+    Commit bliebe der Klon dauerhaft dirty (siehe _sync_one → skipped_dirty).
+
+    Bewusst eng geschnitten: es wird nur der übergebene Pfad gestaged, nie -A.
+    Kein --force, kein automatisches Auflösen von Konflikten — bei einem
+    abgelehnten Push wird der Grund gemeldet, damit Leo entscheiden kann.
+    Fehler sind nie fatal: die Datei ist zu diesem Zeitpunkt schon geschrieben.
+    """
+    try:
+        add = _git(repo, "add", "--", rel_path)
+        if add.returncode != 0:
+            return (add.stderr or "git add fehlgeschlagen").strip()[:160]
+
+        # Nichts gestaged = inhaltlich unverändert, dann auch nichts zu pushen.
+        staged = _git(repo, "diff", "--cached", "--quiet", "--", rel_path)
+        if staged.returncode == 0:
+            return ""
+
+        commit = _git(repo, "commit", "-m", message, "--", rel_path)
+        if commit.returncode != 0:
+            return (commit.stderr or commit.stdout or "git commit fehlgeschlagen").strip()[:160]
+
+        push = _git(repo, "push")
+        if push.returncode != 0:
+            return (
+                (push.stderr or "git push fehlgeschlagen").strip()[:160]
+                + " — Commit liegt lokal, bitte manuell prüfen."
+            )
+    except FileNotFoundError:
+        return "git nicht gefunden"
+    except subprocess.TimeoutExpired:
+        return f"Timeout nach {_GIT_TIMEOUT}s (GitHub erreichbar?)"
+    return ""
+
+
 def main() -> int:
     print("Repo-Sync: hole Stand von GitHub ...")
     results = sync_repos()

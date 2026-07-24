@@ -399,6 +399,9 @@ def _scan_row(e: ScanEntry) -> str:
     else:
         # Ohne Ziel (übersprungen/Fehler) steht oben schon der Quellname.
         sub = f'<span style="color:#9CA3AF;">{_esc(e.note) or "kein Ziel"}</span>'
+    if e.note and trail:
+        # Grund bei Fehlern trotzdem zeigen, wenn schon ein Zielpfad feststand.
+        sub += f'<span style="color:{theme.ROT};"> · {_esc(e.note)}</span>'
     person = (
         f'<span class="acc-badge" style="color:#FAFAF5;">{_esc(e.person)}</span>'
         if e.person

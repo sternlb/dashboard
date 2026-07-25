@@ -55,6 +55,26 @@ export GH_TOKEN="$GITHUB_TOKEN"
 # --- Repos holen ------------------------------------------------------------
 mkdir -p "$REPOS"
 
+# Sagt bei einem fehlgeschlagenen Clone, woran es wirklich liegt. GitHub
+# antwortet auf einen Clone ohne Repo-Zugriff mit "Write access to repository
+# not granted" — das klingt nach fehlendem Schreibrecht, meint aber meistens,
+# dass das Repo gar nicht in der Repository-Auswahl des Tokens steht.
+diagnose_token() {
+    local who code
+    log "Token-Diagnose:"
+    who=$(curl -sS -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+          https://api.github.com/user 2>/dev/null | jq -r '.login // "unbekannt"')
+    log "  Token gehoert zum Konto: ${who}"
+    for r in dashboard SecondBrain-Leo 2526_KI1_GdP_C 2526_KI1_DatB; do
+        code=$(curl -sS -o /dev/null -w '%{http_code}' \
+               -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+               "https://api.github.com/repos/${GITHUB_OWNER}/${r}" 2>/dev/null)
+        log "  ${r}: HTTP ${code}"
+    done
+    log "  200 = ok | 404 = Repo steht nicht in der Repository-Auswahl des Tokens"
+    log "  403 = Repository permissions zu niedrig | 401 = Token ungueltig/zurueckgezogen"
+}
+
 sync_repo() {
     local name="$1" dir="${REPOS}/$1"
     if [ -d "${dir}/.git" ]; then
@@ -64,8 +84,10 @@ sync_repo() {
         fi
     else
         log "clone ${name}"
-        git clone "https://github.com/${GITHUB_OWNER}/${name}.git" "$dir" 2>&1 | sed 's/^/        /' \
-            || fail "${name} konnte nicht geklont werden. Token-Scope prüfen (Contents:read)."
+        if ! git clone "https://github.com/${GITHUB_OWNER}/${name}.git" "$dir" 2>&1 | sed 's/^/        /'; then
+            diagnose_token
+            fail "${name} konnte nicht geklont werden — siehe Token-Diagnose oben."
+        fi
     fi
 }
 

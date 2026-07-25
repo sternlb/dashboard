@@ -7,6 +7,7 @@ FROM ${BUILD_FROM}
 # git   -> Repos klonen/pullen, Kanban-Rückschreiben
 # gh    -> Repo-Kacheln im Command Center (gh repo list), Auth über GH_TOKEN
 # jq    -> /data/options.json in run.sh lesen
+# curl  -> Token-Diagnose gegen die GitHub-API bei fehlgeschlagenem Clone
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         python3 \
@@ -14,6 +15,7 @@ RUN apt-get update \
         git \
         gh \
         jq \
+        curl \
         ca-certificates \
         tzdata \
     && rm -rf /var/lib/apt/lists/*

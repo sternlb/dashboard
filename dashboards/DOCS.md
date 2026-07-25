@@ -36,7 +36,7 @@ und die Version in `config.yaml` hochzählen.
 
 | Option | Bedeutung |
 |---|---|
-| `dashboard_host` | **Pflicht.** LAN-IP des HA-Hosts, z. B. `192.168.178.150`. Ohne sie ermittelt `config.py` die Docker-Bridge-IP (`172.30.x.x`) und schreibt damit *alle* Kachel-Links kaputt. |
+| `dashboard_host` | **Pflicht.** LAN-IP des HA-Hosts, z. B. `192.168.178.50`. Ohne sie ermittelt `config.py` die Docker-Bridge-IP (`172.30.x.x`) und schreibt damit *alle* Kachel-Links kaputt. |
 | `github_owner` | GitHub-Account (`sternlb`) |
 | `github_token` | Fine-grained PAT. `Contents: read` auf `dashboard`, `2526_KI1_GdP_C`, `2526_KI1_DatB`; auf `SecondBrain-Leo` `Contents: write`, falls `vault_writeback` an ist. Dient gleichzeitig als `GH_TOKEN` für die Repo-Kacheln. |
 | `vault_writeback` | `true` = Kanban-Drag&Drop schreibt in den Vault und pusht. `false` = Kanban nur lesen, dann genügt ein Read-Token. |
@@ -70,7 +70,7 @@ Zwei Datenquellen entstehen weiterhin auf dem PC und werden nicht mitgeklont:
 Geplanter Task auf Windows, der beides nächtlich zum Pi spiegelt:
 
 ```bash
-scp -r "$HOME/.claude/projects/." root@192.168.178.150:/share/claude-logs/ && scp "$HOME/repos/scan-workflow/scan_log.csv" root@192.168.178.150:/share/scan/scan_log.csv
+scp -r "$HOME/.claude/projects/." root@<HA-Host-IP>:/share/claude-logs/ && scp "$HOME/repos/scan-workflow/scan_log.csv" root@<HA-Host-IP>:/share/scan/scan_log.csv
 ```
 
 Ohne diesen Job bleiben nur diese beiden Kacheln leer, alles andere läuft.

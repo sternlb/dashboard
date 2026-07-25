@@ -28,7 +28,10 @@ COPY requirements.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir -r /tmp/requirements.txt
 
-ENV PYTHONUNBUFFERED=1 \
+# HOME setzt der Add-on-Container nicht selbst (init: false). Ohne HOME
+# scheitern git config --global, ~/.streamlit und ~/.config/gh.
+ENV HOME=/root \
+    PYTHONUNBUFFERED=1 \
     TZ=Europe/Berlin \
     STREAMLIT_BROWSER_GATHER_USAGE_STATS=false
 

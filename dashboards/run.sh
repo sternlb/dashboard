@@ -28,14 +28,21 @@ VAULT_WRITEBACK=$(opt vault_writeback)
 GIT_USER_NAME=$(opt git_user_name)
 GIT_USER_EMAIL=$(opt git_user_email)
 
-[ -n "$DASHBOARD_HOST" ] || fail "Option 'dashboard_host' ist leer. Ohne sie ermittelt config.py die Docker-Bridge-IP (172.30.x.x) und alle Kachel-Links zeigen ins Leere. Trage die LAN-IP des HA-Hosts ein, z. B. 192.168.178.150."
+[ -n "$DASHBOARD_HOST" ] || fail "Option 'dashboard_host' ist leer. Ohne sie ermittelt config.py die Docker-Bridge-IP (172.30.x.x) und alle Kachel-Links zeigen ins Leere. Trage die LAN-IP des HA-Hosts ein, z. B. 192.168.178.50."
 [ -n "$GITHUB_TOKEN" ]   || fail "Option 'github_token' ist leer. Die Repos sind privat und lassen sich ohne Token nicht klonen."
 
 # --- Git-Setup --------------------------------------------------------------
+# HA-Add-on-Container setzen $HOME nicht (init: false). Ohne HOME brechen alle
+# git-config-Aufrufe mit "fatal: $HOME not set" ab, der credential.helper wird
+# nie gesetzt und private Repos scheitern mit "could not read Username".
+# Betrifft ausserdem ~/.streamlit und ~/.config/gh.
+export HOME=/root
+mkdir -p "$HOME"
+
 # credential.helper store statt Token in der Remote-URL: sonst landet das Token
 # dauerhaft in .git/config unter /share.
-printf 'https://x-access-token:%s@github.com\n' "$GITHUB_TOKEN" > /root/.git-credentials
-chmod 600 /root/.git-credentials
+printf 'https://x-access-token:%s@github.com\n' "$GITHUB_TOKEN" > "$HOME/.git-credentials"
+chmod 600 "$HOME/.git-credentials"
 git config --global credential.helper store
 git config --global user.name  "$GIT_USER_NAME"
 git config --global user.email "$GIT_USER_EMAIL"

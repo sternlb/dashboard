@@ -1,5 +1,5 @@
 name: Leo Dashboards
-version: "0.1.0"
+version: "0.1.1"
 slug: leo_dashboards
 description: AI Command Center, Trading Agent und Landing Page als Dauerbetrieb auf dem HA-Host
 url: https://github.com/sternlb/dashboard
@@ -34,7 +34,7 @@ options:
   github_token: ""
   vault_writeback: true
   git_user_name: Leo Dashboards
-  git_user_email: leonhardbasel84@googlemail.com
+  git_user_email: dashboards@localhost
 schema:
   # Pflicht: im Container liefert der Routing-Lookup in config.py die
   # Docker-Bridge-IP (172.30.x.x) und zerschießt damit alle Kachel-Links.

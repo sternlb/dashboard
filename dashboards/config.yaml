@@ -1,5 +1,5 @@
 name: Leo Dashboards
-version: "0.1.1"
+version: "0.1.2"
 slug: leo_dashboards
 description: AI Command Center, Trading Agent und Landing Page als Dauerbetrieb auf dem HA-Host
 url: https://github.com/sternlb/dashboard

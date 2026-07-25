@@ -79,6 +79,23 @@ CC="${DASH}/ai-command-center"
 TA="${DASH}/trading-agent"
 LP="${DASH}/basel-ai-landing"
 
+# --- Secrets aus /share uebernehmen (Erstbefuellung) ------------------------
+# Das /data dieses Add-ons ist von aussen nicht erreichbar: das SSH-Add-on
+# laeuft im Protection Mode und bekommt /mnt/data nicht gemountet. Deshalb
+# duerfen die Secrets nach /share/leo-dashboards gelegt werden. Hier werden sie
+# einmalig nach /data verschoben und aus /share entfernt — /share ist fuer jedes
+# Add-on lesbar, dort haben sie dauerhaft nichts verloren.
+INBOX=/share/leo-dashboards
+for f in credentials.json token.json token_state.json holdings.csv; do
+    [ -f "${INBOX}/${f}" ] || continue
+    if mv "${INBOX}/${f}" "/data/${f}"; then
+        chmod 600 "/data/${f}"
+        log "Secret uebernommen: ${f} (aus ${INBOX} entfernt)"
+    else
+        log "WARN  ${f} konnte nicht nach /data uebernommen werden"
+    fi
+done
+
 # --- Secrets aus /data verlinken --------------------------------------------
 # /data ist persistent und liegt im HA-Backup; die Dateien sind gitignored,
 # die Repo-Arbeitskopie bleibt dadurch sauber (wichtig für repo_sync).

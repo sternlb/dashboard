@@ -1,7 +1,7 @@
 name: Leo Dashboards
-version: "0.1.3"
+version: "0.1.4"
 slug: leo_dashboards
-description: AI Command Center, Trading Agent und Landing Page als Dauerbetrieb auf dem HA-Host
+description: "AI Command Center, Trading Agent und Landing Page als Dauerbetrieb auf dem HA-Host. Aufruf im LAN: http://192.168.178.150:8500 (Command Center), :8501 (Trading Agent), :8502 (Landing Page)"
 url: https://github.com/sternlb/dashboard
 arch:
   - aarch64

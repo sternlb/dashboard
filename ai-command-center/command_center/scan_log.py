@@ -12,6 +12,7 @@ from datetime import datetime
 from pathlib import Path
 
 from .config import SCAN_LOG_FILE, SCAN_LOG_LIMIT
+from .drive_links import drive_links
 
 _TS_FORMAT = "%Y-%m-%d %H:%M:%S"
 
@@ -30,6 +31,8 @@ class ScanEntry:
     absender: str = ""
     betreff: str = ""
     note: str = ""
+    file_url: str = ""        # Google-Drive-Link zum Dokument ("" = nicht auflösbar)
+    folder_url: str = ""      # Google-Drive-Link zum Zielordner
 
     def short_dir(self, parts: int = 3) -> str:
         """Zielordner gekürzt auf die letzten Ebenen, z. B. Leo / Inbox / Bank."""
@@ -96,4 +99,7 @@ def load_scan_log(path: Path | None = None, limit: int | None = None) -> ScanLog
 
     entries = [_to_entry(r) for r in rows[-limit:]]
     entries.reverse()  # neueste zuerst
+    for e in entries:
+        if e.target_dir:
+            e.file_url, e.folder_url = drive_links(e.target_dir, e.target_name)
     return ScanLogResult(entries=entries, total=len(rows), path=path)

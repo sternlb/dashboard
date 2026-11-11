@@ -99,6 +99,10 @@ Bug zurück:
   Bewegungs-Logbuch des Scanner-Workflows, Section „Zuletzt einsortiert" zeigt die
   letzten 10 Einträge. Pfad per `SCAN_LOG_PATH` überschreibbar, Anzahl per
   `SCAN_LOG_LIMIT`. Fehlt die Datei, erscheint ein Hinweis-Platzhalter.
+  Dateiname und Zielordner sind Links in Google Drive (neuer Tab, auch am Handy).
+  Die Drive-IDs kommen read-only aus der lokalen DB von Drive für Desktop
+  (`%LOCALAPPDATA%\Google\DriveFS\*\metadata_sqlite_db`). Liegt eine Datei nicht
+  mehr am geloggten Pfad (später umbenannt/verschoben), fehlt nur ihr Link.
 
 ## Architektur
 
@@ -115,5 +119,6 @@ command_center/
   github.py            Repo-Übersicht über die gh CLI
   repo_sync.py         git pull für die lokalen Klone
   scan_log.py          Scanner-Bewegungslog (read-only aus scan-workflow)
+  drive_links.py       Drive-Pfad → Google-Drive-Link (read-only, DriveFS-DB)
 ```
 Alle Reader sind Streamlit-frei und fangen fehlende Quellen sauber ab.

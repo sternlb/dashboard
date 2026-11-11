@@ -384,6 +384,16 @@ def _scan_when(e: ScanEntry) -> str:
     return f"{_WD[d.weekday()]} {d.day:02d}.{d.month:02d} · {d.hour:02d}:{d.minute:02d}"
 
 
+def _scan_link(url: str, label_html: str, hint: str) -> str:
+    """Dezenter Link: Farbe vom umgebenden Text, kleines ↗ als Hinweis."""
+    if not url:
+        return label_html
+    return (
+        f'<a class="acc-scan-link" href="{_esc(url)}" target="_blank" '
+        f'rel="noopener" title="{_esc(hint)}">{label_html}</a>'
+    )
+
+
 def _scan_row(e: ScanEntry) -> str:
     icon, color, word = _SCAN_BADGES.get(e.action, ("•", theme.SAGE, e.action or "—"))
     title = e.target_name or e.source_name or "—"
@@ -391,9 +401,10 @@ def _scan_row(e: ScanEntry) -> str:
 
     trail = e.short_dir()
     if trail:
-        # Abgelegt: Zielordner + woher die Datei kam.
+        # Abgelegt: Zielordner (Link → Drive-Ordner) + woher die Datei kam.
         sub = (
-            f'<span style="color:{theme.LIME};">↳ {_esc(trail)}</span>'
+            f'<span style="color:{theme.LIME};">↳ '
+            f'{_scan_link(e.folder_url, _esc(trail), "Ordner in Google Drive öffnen")}</span>'
             f'<span style="color:rgba(250,250,245,0.35);"> · aus {_esc(e.source_name)}</span>'
         )
     else:
@@ -415,7 +426,8 @@ def _scan_row(e: ScanEntry) -> str:
         f'padding-top:2px;">{icon} {_scan_when(e)}</span>'
         '<span style="flex:1;min-width:0;">'
         f'<span style="font-size:14px;color:#FAFAF5;word-break:break-word;" '
-        f'title="{_esc(full)}">{_esc(title)}</span>'
+        f'title="{_esc(full)}">'
+        f'{_scan_link(e.file_url, _esc(title), "Dokument in Google Drive öffnen")}</span>'
         '<span style="display:block;font-size:11.5px;color:rgba(250,250,245,0.5);'
         f'margin-top:3px;word-break:break-word;">{sub}</span></span>'
         f'<span style="display:flex;gap:6px;align-items:center;flex-shrink:0;">{person}'

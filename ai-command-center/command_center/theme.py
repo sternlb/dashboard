@@ -182,6 +182,11 @@ h1, h2, h3, h4 { font-family: 'Space Grotesk', sans-serif !important; letter-spa
   padding: 16px 17px; text-decoration: none !important; display: block;
   transition: transform 0.25s var(--fx-ease), box-shadow 0.25s, border-color 0.25s; }
 .acc-tool, .acc-tool * { text-decoration: none !important; }
+/* Scanner-Ablage: Dokument-/Ordner-Links ohne Link-Optik, ↗ als leiser Hinweis */
+a.acc-scan-link, a.acc-scan-link:visited { color: inherit !important; text-decoration: none !important; }
+a.acc-scan-link::after { content: " ↗"; font-size: 0.85em; opacity: 0.4; }
+a.acc-scan-link:hover { text-decoration: underline !important; text-underline-offset: 3px; }
+a.acc-scan-link:hover::after { opacity: 1; }
 .acc-tool:hover { border-color: rgba(163,230,53,0.55); border-top-color: #A3E635;
   transform: translateY(-3px); box-shadow: 0 14px 30px rgba(0,0,0,0.32); }
 .acc-tool .ic { font-size: 26px; line-height: 1; }
